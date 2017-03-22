@@ -8,6 +8,7 @@ const Travis = require('travis-ci')
 const exec = require('child_process').execSync
 const ansi = require('ansi-escapes')
 const ora = require('ora')
+const chalk = require('chalk')
 
 const dir = process.argv[2] || '.'
 
@@ -85,8 +86,8 @@ const render = results => {
 }
 
 const check = bool => bool
-  ? '✓'
-  : '×'
+  ? chalk.green('✓')
+  : chalk.red('×')
 
 const spinner = ora('Loading build').start()
 
