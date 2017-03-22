@@ -56,7 +56,8 @@ const getJob = (id, cb) => {
 }
 
 let lastLines = 0
-const render = results => {
+
+const render = () => {
   let first = true
 
   Object.keys(results).forEach(os => {
@@ -80,7 +81,7 @@ const render = results => {
 
     versions.forEach(version => {
       const job = results[os][version]
-      process.stdout.write(`  ${check(job.state)} node ${version}`)
+      process.stdout.write(`  ${check(job)} node ${version}`)
       if (job.state === 'started') {
         process.stdout.write(` ${chalk.white(`(${ms(new Date() - new Date(job.started_at))})`)}`)
       }
@@ -93,13 +94,25 @@ const render = results => {
   })
 }
 
+const results = {
+  osx: {},
+  linux: {}
+}
+
+const iv = setInterval(() => {
+  render()
+}, 100)
+
 let i = 0
-const check = state => {
-  i = (i + 1) % spinners.dots.frames.length
-  return state === 'failed' ? chalk.red('×')
+const check = job => {
+  job.frame = job.frame || 0
+  const state = job.state
+  const out = state === 'failed' ? chalk.red('×')
   : state === 'passed' ? chalk.green('✓')
-  : state === 'started' ? chalk.yellow(spinners.dots.frames[i])
-  : chalk.gray(spinners.dots.frames[i])
+  : state === 'started' ? chalk.yellow(spinners.dots.frames[job.frame])
+  : chalk.gray(spinners.dots.frames[job.frame])
+  job.frame = (job.frame + 1) % spinners.dots.frames.length
+  return out
 }
 
 const spinner = ora('Loading build').start()
@@ -107,20 +120,20 @@ const spinner = ora('Loading build').start()
 getBuild((err, build) => {
   if (err) throw err
 
-  const results = {
-    osx: {},
-    linux: {}
-  }
-
   spinner.text = 'Loading jobs'
+  let todo = build.job_ids.length
 
   build.job_ids.forEach(jobId => {
     const check = (err, job) => {
       if (err) throw err
       results[job.config.os][job.config.node_js] = job
-      render(results)
       if (job.state === 'started' || job.state === 'created') {
         getJob(jobId, check)
+      } else {
+        if (!--todo) {
+          render()
+          process.exit()
+        }
       }
     }
     getJob(jobId, check)
