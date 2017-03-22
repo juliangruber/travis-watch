@@ -4,6 +4,7 @@
   "license": "MIT",
   "repository": "juliangruber/travis-watch",
   "dependencies": {
+    "ansi-escapes": "^1.4.0",
     "get-pkg-repo": "^1.3.0",
     "travis-ci": "^2.1.1"
   },
