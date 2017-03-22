@@ -11,6 +11,7 @@ const ora = require('ora')
 const chalk = require('chalk')
 const resolve = require('path').resolve
 const ms = require('ms')
+const spinners = require('cli-spinners')
 
 const dir = resolve(process.argv[2] || '.')
 
@@ -92,11 +93,14 @@ const render = results => {
   })
 }
 
-const check = state =>
-  state === 'failed' ? chalk.red('×')
+let i = 0
+const check = state => {
+  i = (i + 1) % spinners.dots.frames.length
+  return state === 'failed' ? chalk.red('×')
   : state === 'passed' ? chalk.green('✓')
-  : state === 'started' ? chalk.yellow('-')
-  : chalk.gray('-')
+  : state === 'started' ? chalk.yellow(spinners.dots.frames[i])
+  : chalk.gray(spinners.dots.frames[i])
+}
 
 const spinner = ora('Loading build').start()
 
