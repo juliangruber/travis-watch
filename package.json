@@ -1,0 +1,16 @@
+{
+  "name": "travis-watch",
+  "version": "0.0.0",
+  "license": "MIT",
+  "repository": "juliangruber/travis-watch",
+  "dependencies": {
+    "get-pkg-repo": "^1.3.0",
+    "travis-ci": "^2.1.1"
+  },
+  "devDependencies": {
+    "prettier-standard-formatter": "^0.222222222222222.333333333333333"
+  },
+  "scripts": {
+    "test": "prettier-standard-formatter index.js"
+  }
+}
