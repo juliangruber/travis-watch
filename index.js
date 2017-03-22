@@ -114,7 +114,9 @@ getBuild((err, build) => {
       if (err) throw err
       results[job.config.os][job.config.node_js] = job
       render(results)
-      if (job.state === 'started') getJob(jobId, check)
+      if (job.state === 'started' || job.state === 'created') {
+        getJob(jobId, check)
+      }
     }
     getJob(jobId, check)
   })
