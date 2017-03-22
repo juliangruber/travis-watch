@@ -10,6 +10,7 @@ const ansi = require('ansi-escapes')
 const ora = require('ora')
 const chalk = require('chalk')
 const resolve = require('path').resolve
+const ms = require('ms')
 
 const dir = resolve(process.argv[2] || '.')
 
@@ -77,7 +78,12 @@ const render = results => {
     console.log()
 
     versions.forEach(version => {
-      console.log(`  ${check(results[os][version])} node ${version}`)
+      const job = results[os][version]
+      process.stdout.write(`  ${check(job.state)} node ${version}`)
+      if (job.state === 'started') {
+        process.stdout.write(` ${chalk.white(`(${ms(new Date() - new Date(job.started_at))})`)}`)
+      }
+      process.stdout.write('\n')
     })
 
     console.log()
@@ -106,7 +112,7 @@ getBuild((err, build) => {
   build.job_ids.forEach(jobId => {
     const check = (err, job) => {
       if (err) throw err
-      results[job.config.os][job.config.node_js] = job.state
+      results[job.config.os][job.config.node_js] = job
       render(results)
       if (job.state === 'started') getJob(jobId, check)
     }
