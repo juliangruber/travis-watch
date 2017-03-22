@@ -76,7 +76,7 @@ const render = results => {
     console.log()
 
     versions.forEach(version => {
-      console.log(`  - node v${version}: ${check(results[os][version])}`)
+      console.log(`  ${check(results[os][version])} node ${version}`)
     })
 
     console.log()
