@@ -9,8 +9,9 @@ const exec = require('child_process').execSync
 const ansi = require('ansi-escapes')
 const ora = require('ora')
 const chalk = require('chalk')
+const resolve = require('path').resolve
 
-const dir = process.argv[2] || '.'
+const dir = resolve(process.argv[2] || '.')
 
 const repo = getRepo(require(`${dir}/package.json`))
 assert(repo.user)
