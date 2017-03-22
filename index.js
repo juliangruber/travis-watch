@@ -7,6 +7,7 @@ const assert = require('assert')
 const Travis = require('travis-ci')
 const exec = require('child_process').execSync
 const ansi = require('ansi-escapes')
+const ora = require('ora')
 
 const dir = process.argv[2] || '.'
 
@@ -52,14 +53,22 @@ const getJob = (id, cb) => {
 
 let lastLines = 0
 const render = results => {
-  process.stdout.write(ansi.eraseLines(lastLines))
-  process.stdout.write(ansi.cursorPrevLine)
-  process.stdout.write(ansi.eraseLine)
-  lastLines = 0
+  let first = true
 
   Object.keys(results).forEach(os => {
     const versions = Object.keys(results[os])
     if (!versions.length) return
+
+    if (first) {
+      spinner.stop()
+      process.stdout.write(ansi.eraseLines(lastLines))
+      if (lastLines) {
+        process.stdout.write(ansi.cursorPrevLine)
+        process.stdout.write(ansi.eraseLine)
+      }
+      lastLines = 0
+      first = false
+    }
 
     console.log()
     console.log(os)
@@ -79,7 +88,8 @@ const check = bool => bool
   ? '✓'
   : '×'
 
-console.log('...')
+const spinner = ora('Loading build').start()
+
 getBuild((err, build) => {
   if (err) throw err
 
@@ -87,6 +97,8 @@ getBuild((err, build) => {
     osx: {},
     linux: {}
   }
+
+  spinner.text = 'Loading jobs'
 
   build.job_ids.forEach(jobId => {
     const check = (err, job) => {
