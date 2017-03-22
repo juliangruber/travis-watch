@@ -95,7 +95,8 @@ const render = results => {
 const check = state =>
   state === 'failed' ? chalk.red('×')
   : state === 'passed' ? chalk.green('✓')
-  : chalk.yellow('.')
+  : state === 'started' ? chalk.yellow('-')
+  : chalk.gray('-')
 
 const spinner = ora('Loading build').start()
 
