@@ -15,5 +15,8 @@
   },
   "scripts": {
     "test": "prettier-standard-formatter index.js"
+  },
+  "bin": {
+    "travis-watch": "index.js"
   }
 }

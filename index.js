@@ -72,7 +72,7 @@ const render = results => {
     }
 
     console.log()
-    console.log(os)
+    console.log(chalk.gray(os))
     console.log()
 
     versions.forEach(version => {
@@ -85,9 +85,10 @@ const render = results => {
   })
 }
 
-const check = bool => bool
-  ? chalk.green('✓')
-  : chalk.red('×')
+const check = state =>
+  state === 'failed' ? chalk.red('×')
+  : state === 'passed' ? chalk.green('✓')
+  : chalk.yellow('.')
 
 const spinner = ora('Loading build').start()
 
@@ -104,10 +105,9 @@ getBuild((err, build) => {
   build.job_ids.forEach(jobId => {
     const check = (err, job) => {
       if (err) throw err
-      const passed = job.state === 'passed'
-      results[job.config.os][job.config.node_js] = passed
+      results[job.config.os][job.config.node_js] = job.state
       render(results)
-      if (!passed) getJob(jobId, check)
+      if (job.state === 'created') getJob(jobId, check)
     }
     getJob(jobId, check)
   })
