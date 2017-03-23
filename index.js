@@ -12,6 +12,7 @@ const chalk = require('chalk')
 const resolve = require('path').resolve
 const ms = require('ms')
 const spinners = require('cli-spinners')
+const differ = require('ansi-diff-stream')
 
 const dir = resolve(process.argv[2] || '.')
 
@@ -55,43 +56,34 @@ const getJob = (id, cb) => {
   })
 }
 
-let lastLines = 0
+let diff = differ()
+diff.pipe(process.stdout)
 
 const render = () => {
-  let first = true
+  let out = ''
 
   Object.keys(results).forEach(os => {
     const versions = Object.keys(results[os])
     if (!versions.length) return
+    spinner.stop()
 
-    if (first) {
-      spinner.stop()
-      process.stdout.write(ansi.eraseLines(lastLines))
-      if (lastLines) {
-        process.stdout.write(ansi.cursorPrevLine)
-        process.stdout.write(ansi.eraseLine)
-      }
-      lastLines = 0
-      first = false
-    }
-
-    console.log()
-    console.log(chalk.gray(os))
-    console.log()
+    out += '\n'
+    out += chalk.gray(os)
+    out += '\n'
 
     versions.forEach(version => {
       const job = results[os][version]
-      process.stdout.write(`  ${check(job)} node ${version}`)
+      out += `  ${check(job)} node ${version}`
       if (job.state === 'started') {
-        process.stdout.write(` ${chalk.white(`(${ms(new Date() - new Date(job.started_at))})`)}`)
+        out += ` ${chalk.white(`(${ms(new Date() - new Date(job.started_at))})`)}`
       }
-      process.stdout.write('\n')
+      out += '\n'
     })
 
-    console.log()
-
-    lastLines += 4 + versions.length
+    out += '\n'
   })
+
+  diff.write(out)
 }
 
 const results = {
@@ -99,9 +91,7 @@ const results = {
   linux: {}
 }
 
-const iv = setInterval(() => {
-  render()
-}, 100)
+setInterval(render, 100)
 
 let i = 0
 const check = job => {
