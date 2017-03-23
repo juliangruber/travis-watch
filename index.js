@@ -6,7 +6,6 @@ const getRepo = require('get-pkg-repo')
 const assert = require('assert')
 const Travis = require('travis-ci')
 const exec = require('child_process').execSync
-const ansi = require('ansi-escapes')
 const ora = require('ora')
 const chalk = require('chalk')
 const resolve = require('path').resolve
