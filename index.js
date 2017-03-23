@@ -58,6 +58,7 @@ const getJob = (id, cb) => {
 
 let diff = differ()
 diff.pipe(process.stdout)
+let frameIdx = 0
 
 const render = () => {
   let out = ''
@@ -75,7 +76,7 @@ const render = () => {
 
     versions.forEach(version => {
       const job = results[os][version]
-      out += `  ${check(job)} node ${version}`
+      out += `  ${check(job.state, spinners.dots.frames[frameIdx])} node ${version}`
       if (job.state === 'started') {
         out += ` ${chalk.white(`(${ms(new Date() - new Date(job.started_at))})`)}`
       }
@@ -84,6 +85,8 @@ const render = () => {
 
     out += '\n'
   })
+
+  frameIdx = (frameIdx + 1) % spinners.dots.frames.length
 
   diff.write(out)
 }
@@ -103,15 +106,11 @@ const results = {
 
 setInterval(render, 100)
 
-let i = 0
-const check = job => {
-  job.frame = job.frame || 0
-  const state = job.state
+const check = (state, frame) => {
   const out = state === 'failed' ? chalk.red('×')
   : state === 'passed' ? chalk.green('✓')
-  : state === 'started' ? chalk.yellow(spinners.dots.frames[job.frame])
-  : chalk.gray(spinners.dots.frames[job.frame])
-  job.frame = (job.frame + 1) % spinners.dots.frames.length
+  : state === 'started' ? chalk.yellow(frame)
+  : chalk.gray(frame)
   return out
 }
 
