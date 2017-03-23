@@ -111,17 +111,19 @@ getBuild((err, build) => {
 
   spinner.text = 'Loading jobs'
   let todo = build.job_ids.length
+  let exitCode = 0
 
   build.job_ids.forEach(jobId => {
     const check = (err, job) => {
       if (err) throw err
       results[job.config.os][job.config.node_js] = job
+      if (job.state === 'failed') exitCode = 1
       if (job.state === 'started' || job.state === 'created') {
         getJob(jobId, check)
       } else {
         if (!--todo) {
           render()
-          process.exit()
+          process.exit(exitCode)
         }
       }
     }
