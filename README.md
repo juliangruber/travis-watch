@@ -17,6 +17,10 @@ $ npm install -g travis-watch
 $ travis-watch [DIRECTORY]
 ```
 
+## Kudos
+
+Development of this module is sponsored by the [Dat Project](https://datproject.org/).
+
 ## License
 
 MIT
