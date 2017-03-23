@@ -12,6 +12,7 @@ const resolve = require('path').resolve
 const ms = require('ms')
 const spinners = require('cli-spinners')
 const differ = require('ansi-diff-stream')
+const semver = require('semver')
 
 const dir = resolve(process.argv[2] || '.')
 
@@ -62,7 +63,9 @@ const render = () => {
   let out = ''
 
   Object.keys(results).forEach(os => {
-    const versions = Object.keys(results[os])
+    const versions = Object.keys(results[os]).sort((a, b) => {
+      return semver.compare(fixSemver(a), fixSemver(b))
+    })
     if (!versions.length) return
     spinner.stop()
 
@@ -83,6 +86,14 @@ const render = () => {
   })
 
   diff.write(out)
+}
+
+const fixSemver = s => {
+  const segs = String(s).split('.')
+  segs[0] = segs[0] || '0'
+  segs[1] = segs[1] || '0'
+  segs[2] = segs[2] || '0'
+  return segs.join('.')
 }
 
 const results = {
