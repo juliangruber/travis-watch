@@ -65,14 +65,13 @@ let frameIdx = 0
 const render = () => {
   let out = ''
 
-  Object.keys(results).forEach(os => {
+  Object.keys(results).forEach((os, _, arr) => {
     const versions = Object.keys(results[os]).sort(compare)
     if (!versions.length) return
     spinner.stop()
 
     out += '\n'
-    out += chalk.gray(os)
-    out += '\n'
+    if (arr.length > 1) out += `${chalk.gray(os)}\n`
 
     versions.forEach(version => {
       const job = results[os][version]
@@ -99,10 +98,7 @@ const fixSemver = s => {
   return segs.join('.')
 }
 
-const results = {
-  osx: {},
-  linux: {}
-}
+const results = {}
 
 setInterval(render, 100)
 
@@ -131,6 +127,7 @@ getBuild((err, build) => {
   build.job_ids.forEach(jobId => {
     const check = (err, job) => {
       if (err) throw err
+      results[job.config.os] = results[job.config.os] || {}
       results[job.config.os][getJobKey(job)] = job
       if (job.state === 'failed') exitCode = 1
       if (job.state === 'started' || job.state === 'created') {
