@@ -14,10 +14,11 @@
     "travis-ci": "^2.1.1"
   },
   "devDependencies": {
-    "prettier-standard-formatter": "^0.222222222222222.333333333333333"
+    "prettier-standard-formatter": "^0.222222222222222.333333333333333",
+    "tap": "^10.3.0"
   },
   "scripts": {
-    "test": "prettier-standard-formatter index.js"
+    "test": "prettier-standard-formatter *.js test/*.js && tap test/*.js"
   },
   "bin": {
     "travis-watch": "index.js"
