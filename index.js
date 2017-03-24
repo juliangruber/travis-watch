@@ -9,6 +9,11 @@ const gitRemoteOriginUrl = require('git-remote-origin-url')
 const parseGitHubRepoUrl = require('parse-github-repo-url')
 const render = require('./lib/render')
 
+if (process.argv[2] === '--help') {
+  console.error('Usage: travis-watch [DIRECTORY]')
+  process.exit(1)
+}
+
 const travis = new Travis({ version: '2.0.0' })
 const dir = resolve(process.argv[2] || '.')
 

@@ -14,7 +14,8 @@ $ npm install -g travis-watch
 ## Usage
 
 ```bash
-$ travis-watch [DIRECTORY]
+$ travis-watch --help
+Usage: travis-watch [DIRECTORY]
 ```
 
 ## Supported build environments
