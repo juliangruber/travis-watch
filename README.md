@@ -20,6 +20,7 @@ $ travis-watch [DIRECTORY]
 ## Supported build environments
 
 - Node.js
+- Ruby
 - PHP
 
 For more, please [open an issue](https://github.com/juliangruber/travis-watch/issues/new).
