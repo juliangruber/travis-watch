@@ -32,7 +32,7 @@ const getRepo = (dir, cb) => {
 const getBuilds = cb => {
   getRepo(dir, (err, repo) => {
     if (err) return cb(err)
-    travis.repos(repo[0], repo[1]).builds.get(cb)
+    travis.repos(repo[0], repo[1]).builds.get({ event_type: 'push' }, cb)
   })
 }
 
