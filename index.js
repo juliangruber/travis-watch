@@ -21,10 +21,12 @@ const state = {
 
 const getRepo = (dir, cb) => {
   if (state.repo) return cb()
-  gitRemoteOriginUrl(dir).then(url => {
-    state.repo = parseGitHubRepoUrl(url)
-    cb()
-  }).catch(cb)
+  gitRemoteOriginUrl(dir)
+    .then(url => {
+      state.repo = parseGitHubRepoUrl(url)
+      cb()
+    })
+    .catch(cb)
 }
 
 const getBuilds = cb => {
