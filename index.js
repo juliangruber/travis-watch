@@ -5,7 +5,6 @@ const fs = require('fs')
 const getRepo = require('get-pkg-repo')
 const assert = require('assert')
 const Travis = require('travis-ci')
-const exec = require('child_process').execSync
 const ora = require('ora')
 const chalk = require('chalk')
 const resolve = require('path').resolve
@@ -13,6 +12,7 @@ const ms = require('ms')
 const spinners = require('cli-spinners')
 const differ = require('ansi-diff-stream')
 const compare = require('./lib/compare')
+const getCommit = require('git-current-commit').sync
 
 const dir = resolve(process.argv[2] || '.')
 
@@ -20,12 +20,7 @@ const repo = getRepo(require(`${dir}/package.json`))
 assert(repo.user)
 assert(repo.project)
 
-const sha = exec('git log --format="%H" -n1', {
-  cwd: dir
-})
-  .toString()
-  .trim()
-
+const sha = getCommit(dir)
 const travis = new Travis({ version: '2.0.0' })
 
 const getBuilds = cb => travis.repos(repo.user, repo.project).builds.get(cb)
