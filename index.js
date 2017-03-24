@@ -66,7 +66,11 @@ const getJob = (id, cb) => {
 
 setInterval(() => render(state), 100)
 
-const getJobKey = job => job.config.node_js || job.config.php
+const getJobKey = job => JSON.stringify(job.config)
+const getLanguageVersion = job =>
+  job.config.language === 'ruby'
+    ? String(job.config.rvm)
+    : String(job.config[job.config.language]) || '?'
 
 getBuild(err => {
   if (err) throw err
@@ -77,8 +81,10 @@ getBuild(err => {
   state.build.job_ids.forEach(jobId => {
     const check = (err, job) => {
       if (err) throw err
+      job.version = getLanguageVersion(job)
+      job.key = getJobKey(job)
       state.results[job.config.os] = state.results[job.config.os] || {}
-      state.results[job.config.os][getJobKey(job)] = job
+      state.results[job.config.os][job.key] = job
       if (job.state === 'failed') exitCode = 1
       if (
         job.state === 'started' ||
