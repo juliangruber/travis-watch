@@ -26,7 +26,7 @@ const getRepo = (dir, cb) => {
   gitRemoteOriginUrl(dir).then(url => {
     repo = parseGitHubRepoUrl(url)
     cb(null, repo)
-  })
+  }).catch(cb)
 }
 
 const getBuilds = cb => {
