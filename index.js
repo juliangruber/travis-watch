@@ -2,8 +2,6 @@
 'use strict'
 
 const fs = require('fs')
-const getRepo = require('get-pkg-repo')
-const assert = require('assert')
 const Travis = require('travis-ci')
 const ora = require('ora')
 const chalk = require('chalk')
@@ -13,17 +11,31 @@ const spinners = require('cli-spinners')
 const differ = require('ansi-diff-stream')
 const compare = require('./lib/compare')
 const getCommit = require('git-current-commit').sync
+const gitRemoteOriginUrl = require('git-remote-origin-url')
+const parseGitHubRepoUrl = require('parse-github-repo-url')
 
 const dir = resolve(process.argv[2] || '.')
-
-const repo = getRepo(require(`${dir}/package.json`))
-assert(repo.user)
-assert(repo.project)
 
 const sha = getCommit(dir)
 const travis = new Travis({ version: '2.0.0' })
 
-const getBuilds = cb => travis.repos(repo.user, repo.project).builds.get(cb)
+let repo
+
+const getRepo = (dir, cb) => {
+  if (repo) return cb(null, repo)
+  gitRemoteOriginUrl(dir).then(url => {
+    repo = parseGitHubRepoUrl(url)
+    cb(null, repo)
+  })
+}
+
+const getBuilds = cb => {
+  getRepo(dir, (err, repo) => {
+    if (err) return cb(err)
+    travis.repos(repo[0], repo[1]).builds.get(cb)
+  })
+}
+
 const findCommit = commits => commits.find(c => c.sha === sha)
 const findBuild = (builds, commitId) =>
   builds.find(b => b.commit_id === commitId)
