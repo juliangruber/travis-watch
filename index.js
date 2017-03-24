@@ -45,7 +45,7 @@ const getBuild = cb => {
   getBuilds((err, res) => {
     if (err) return cb(err)
     const commit = findCommit(res.commits)
-    if (!commit) return getBuild(cb)
+    if (!commit) return setTimeout(() => getBuild(cb), 1000)
     state.commit = commit
     const build = findBuild(res.builds, commit.id)
     if (build) {
@@ -85,7 +85,7 @@ getBuild(err => {
         job.state === 'created' ||
         job.state === 'received'
       ) {
-        getJob(jobId, check)
+        setTimeout(() => getJob(jobId, check), 1000)
       } else {
         if (!--todo) {
           render(state)
