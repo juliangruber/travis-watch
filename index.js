@@ -65,12 +65,11 @@ let frameIdx = 0
 const render = () => {
   let out = ''
 
-  Object.keys(results).forEach((os, _, arr) => {
+  Object.keys(results).forEach((os, i, arr) => {
     const versions = Object.keys(results[os]).sort(compare)
-    if (!versions.length) return
     spinner.stop()
 
-    out += '\n'
+    if (i === 0) out += '\n'
     if (arr.length > 1) out += `${chalk.gray(os)}\n`
 
     versions.forEach(version => {
