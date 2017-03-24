@@ -70,6 +70,8 @@ const getJobKey = job => JSON.stringify(job.config)
 const getLanguageVersion = job =>
   job.config.language === 'ruby'
     ? String(job.config.rvm)
+    : job.config.language === 'android'
+    ? '?'
     : String(job.config[job.config.language]) || '?'
 
 getBuild(err => {
