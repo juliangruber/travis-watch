@@ -85,7 +85,7 @@ getBuild(err => {
       job.key = getJobKey(job)
       state.results[job.config.os] = state.results[job.config.os] || {}
       state.results[job.config.os][job.key] = job
-      if (job.state === 'failed') exitCode = 1
+      if (job.state === 'failed' && !job.allow_failure) exitCode = 1
       if (
         job.state === 'started' ||
         job.state === 'created' ||
