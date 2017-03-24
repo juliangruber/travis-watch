@@ -78,7 +78,11 @@ getBuild(err => {
       state.results[job.config.os] = state.results[job.config.os] || {}
       state.results[job.config.os][getJobKey(job)] = job
       if (job.state === 'failed') exitCode = 1
-      if (job.state === 'started' || job.state === 'created') {
+      if (
+        job.state === 'started' ||
+        job.state === 'created' ||
+        job.state === 'received'
+      ) {
         getJob(jobId, check)
       } else {
         if (!--todo) {
