@@ -22,19 +22,16 @@ assert(repo.project)
 
 const sha = exec('git log --format="%H" -n1', {
   cwd: dir
-}).toString().trim()
+})
+  .toString()
+  .trim()
 
 const travis = new Travis({ version: '2.0.0' })
 
-const getBuilds = cb => {
-  travis
-  .repos(repo.user, repo.project)
-  .builds
-  .get(cb)
-}
-
+const getBuilds = cb => travis.repos(repo.user, repo.project).builds.get(cb)
 const findCommit = commits => commits.find(c => c.sha === sha)
-const findBuild = (builds, commitId) => builds.find(b => b.commit_id === commitId)
+const findBuild = (builds, commitId) =>
+  builds.find(b => b.commit_id === commitId)
 
 const getBuild = cb => {
   getBuilds((err, res) => {
@@ -48,9 +45,7 @@ const getBuild = cb => {
 }
 
 const getJob = (id, cb) => {
-  travis
-  .jobs(id)
-  .get((err, res) => {
+  travis.jobs(id).get((err, res) => {
     if (err) return cb(err)
     cb(null, res.job)
   })
@@ -105,10 +100,11 @@ const results = {
 setInterval(render, 100)
 
 const check = (state, frame) => {
-  const out = state === 'failed' ? chalk.red('×')
-  : state === 'passed' ? chalk.green('✓')
-  : state === 'started' ? chalk.yellow(frame)
-  : chalk.gray(frame)
+  const out = state === 'failed'
+    ? chalk.red('×')
+    : state === 'passed'
+        ? chalk.green('✓')
+        : state === 'started' ? chalk.yellow(frame) : chalk.gray(frame)
   return out
 }
 
