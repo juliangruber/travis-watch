@@ -89,14 +89,6 @@ const render = () => {
   diff.write(out)
 }
 
-const fixSemver = s => {
-  const segs = String(s).split('.')
-  segs[0] = segs[0] || '0'
-  segs[1] = segs[1] || '0'
-  segs[2] = segs[2] || '0'
-  return segs.join('.')
-}
-
 const results = {}
 
 setInterval(render, 100)
