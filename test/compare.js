@@ -1,4 +1,4 @@
-const { test } = require('tap')
+const test = require('tap').test
 const compare = require('../lib/compare')
 
 test('compare', t => {
