@@ -76,7 +76,7 @@ const render = () => {
 
     versions.forEach(version => {
       const job = results[os][version]
-      out += `  ${check(job.state, spinners.dots.frames[frameIdx])} node ${version}`
+      out += `  ${check(job.state, spinners.dots.frames[frameIdx])} ${getJobLanguage(job)} ${version}`
       if (job.state === 'started') {
         out += ` ${chalk.white(`(${ms(new Date() - new Date(job.started_at))})`)}`
       }
@@ -117,6 +117,10 @@ const check = (state, frame) => {
 
 const spinner = ora('Loading build').start()
 
+const getJobLanguage = job =>
+  job.config.node_js ? 'node' : job.config.php ? 'php' : '?'
+const getJobKey = job => job.config.node_js || job.config.php
+
 getBuild((err, build) => {
   if (err) throw err
 
@@ -127,7 +131,7 @@ getBuild((err, build) => {
   build.job_ids.forEach(jobId => {
     const check = (err, job) => {
       if (err) throw err
-      results[job.config.os][job.config.node_js] = job
+      results[job.config.os][getJobKey(job)] = job
       if (job.state === 'failed') exitCode = 1
       if (job.state === 'started' || job.state === 'created') {
         getJob(jobId, check)

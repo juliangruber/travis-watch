@@ -17,6 +17,13 @@ $ npm install -g travis-watch
 $ travis-watch [DIRECTORY]
 ```
 
+## Supported build environments
+
+- Node.js
+- PHP
+
+For more, please [open an issue](https://github.com/juliangruber/travis-watch/issues/new).
+
 ## Kudos
 
 - Development of this module is sponsored by the [Dat Project](https://datproject.org/).
