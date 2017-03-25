@@ -98,7 +98,6 @@ getBuild(err => {
   if (err) throw err
 
   let todo = state.build.job_ids.length
-  let exitCode = 0
 
   state.build.job_ids.forEach(jobId => {
     const check = (err, job) => {
