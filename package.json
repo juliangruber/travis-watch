@@ -1,6 +1,6 @@
 {
   "name": "travis-watch",
-  "version": "1.13.1",
+  "version": "1.13.2",
   "license": "MIT",
   "repository": "juliangruber/travis-watch",
   "dependencies": {
