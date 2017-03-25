@@ -110,7 +110,8 @@ getBuild(err => {
       if (
         job.state === 'started' ||
         job.state === 'created' ||
-        job.state === 'received'
+        job.state === 'received' ||
+        job.state === 'queued'
       ) {
         setTimeout(() => getJob(jobId, check), 1000)
       } else {
