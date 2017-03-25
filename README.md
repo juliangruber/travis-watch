@@ -1,6 +1,8 @@
 
 # travis-watch [![Build Status](https://travis-ci.org/juliangruber/travis-watch.svg?branch=master)](https://travis-ci.org/juliangruber/travis-watch)
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/juliangruber/travis-watch.svg)](https://greenkeeper.io/)
+
 Stream live travis test results of the current commit to your terminal. Exits with the proper exit code too!
 
 ![screenshot](screenshot.png)
