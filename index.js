@@ -65,9 +65,19 @@ const getBuild = cb => {
   })
 }
 
+const fixOSXBug = job => {
+  if (
+    job.config.os === 'osx' &&
+    job.state === 'started' &&
+    new Date(job.started_at) > new Date()
+  ) {
+    job.state = 'created'
+  }
+}
 const getJob = (id, cb) => {
   travis.jobs(id).get((err, res) => {
     if (err) return cb(err)
+    fixOSXBug(res.job)
     cb(null, res.job)
   })
 }
