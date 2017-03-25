@@ -116,6 +116,7 @@ getBuild(err => {
         setTimeout(() => getJob(jobId, check), 1000)
       } else {
         if (!--todo) {
+          if (typeof state.success !== 'boolean') state.success = true
           render(state)
           process.exit(!state.success)
         }
