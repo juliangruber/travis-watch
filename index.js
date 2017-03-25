@@ -24,7 +24,8 @@ const state = {
   commit: { sha: getCommit(dir) },
   repo: null,
   build: null,
-  results: {}
+  results: {},
+  success: null
 }
 
 const getRepo = (dir, cb) => {
@@ -106,7 +107,7 @@ getBuild(err => {
       job.key = getJobKey(job)
       state.results[job.config.os] = state.results[job.config.os] || {}
       state.results[job.config.os][job.key] = job
-      if (job.state === 'failed' && !job.allow_failure) exitCode = 1
+      if (job.state === 'failed' && !job.allow_failure) state.success = false
       if (
         job.state === 'started' ||
         job.state === 'created' ||
@@ -117,7 +118,7 @@ getBuild(err => {
       } else {
         if (!--todo) {
           render(state)
-          process.exit(exitCode)
+          process.exit(!state.success)
         }
       }
     }
