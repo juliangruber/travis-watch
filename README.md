@@ -23,6 +23,8 @@ Usage: travis-watch [DIRECTORY]
 - Node.js
 - Ruby
 - PHP
+- Go
+- Python
 
 For more, please [open an issue](https://github.com/juliangruber/travis-watch/issues/new).
 
