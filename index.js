@@ -28,6 +28,7 @@ try {
 const travis = new Travis({ version: '2.0.0' })
 
 const state = {
+  started: new Date(),
   commit: { sha: getCommit(dir) },
   repo: null,
   build: null,
@@ -135,4 +136,3 @@ getBuild(err => {
 })
 
 setInterval(() => render(state), 100)
-
