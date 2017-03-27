@@ -18,6 +18,13 @@ try {
   process.exit(1)
 }
 
+try {
+  fs.statSync(`${dir}/.travis.yml`)
+} catch (err) {
+  console.error('Travis not set up. Skipping...')
+  process.exit(0)
+}
+
 const travis = new Travis({ version: '2.0.0' })
 
 const state = {
