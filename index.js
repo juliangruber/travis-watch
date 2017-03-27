@@ -48,6 +48,7 @@ const getBuilds = cb => {
 }
 
 const findCommit = commits => commits.find(c => c.sha === state.commit.sha)
+
 const findBuild = (builds, commitId) =>
   builds.find(b => b.commit_id === commitId)
 
@@ -76,6 +77,7 @@ const fixOSXBug = job => {
     job.state = 'created'
   }
 }
+
 const getJob = (id, cb) => {
   travis.jobs(id).get((err, res) => {
     if (err) return cb(err)
@@ -84,9 +86,8 @@ const getJob = (id, cb) => {
   })
 }
 
-setInterval(() => render(state), 100)
-
 const getJobKey = job => JSON.stringify(job.config)
+
 const getLanguageVersion = job =>
   job.config.language === 'ruby'
     ? String(job.config.rvm)
@@ -125,3 +126,6 @@ getBuild(err => {
     getJob(jobId, check)
   })
 })
+
+setInterval(() => render(state), 100)
+
