@@ -35,7 +35,7 @@ const getRepo = (dir, cb) => {
       state.repo = parseGitHubRepoUrl(url)
       cb()
     })
-    .catch(cb)
+    .catch(err => setImmediate(() => cb(err)))
 }
 
 const getBuilds = cb => {
