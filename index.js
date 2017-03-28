@@ -50,8 +50,9 @@ Watch.prototype._findCommit = function (commits) {
   return commits.find(c => c.sha === this.state.commit.sha)
 }
 
-const findBuild = (builds, commitId) =>
-  builds.find(b => b.commit_id === commitId)
+Watch.prototype._findBuild = function (builds) {
+  return builds.find(b => b.commit_id === this.state.commit.id)
+}
 
 Watch.prototype._getBuild = function (cb) {
   this._getBuilds((err, res) => {
@@ -59,7 +60,7 @@ Watch.prototype._getBuild = function (cb) {
     const commit = this._findCommit(res.commits)
     if (!commit) return setTimeout(() => this._getBuild(cb), 1000)
     this.state.commit = commit
-    const build = findBuild(res.builds, commit.id)
+    const build = this._findBuild(res.builds)
     if (build) {
       this.state.build = build
       this.state.link = `https://travis-ci.org/${this.state.repo[0]}/${this.state.repo[1]}/builds/${this.state.build.id}`
