@@ -54,6 +54,10 @@ Watch.prototype._findBuild = function (builds) {
   return builds.find(b => b.commit_id === this.state.commit.id)
 }
 
+Watch.prototype._link = function () {
+  return `https://travis-ci.org/${this.state.repo[0]}/${this.state.repo[1]}/builds/${this.state.build.id}`
+}
+
 Watch.prototype._getBuild = function (cb) {
   this._getBuilds((err, res) => {
     if (err) return cb(err)
@@ -63,7 +67,7 @@ Watch.prototype._getBuild = function (cb) {
     const build = this._findBuild(res.builds)
     if (build) {
       this.state.build = build
-      this.state.link = `https://travis-ci.org/${this.state.repo[0]}/${this.state.repo[1]}/builds/${this.state.build.id}`
+      this.state.link = this._link()
       cb()
     } else {
       this._getBuild(cb)
