@@ -20,6 +20,7 @@ function Watch (dir) {
 
   this._dir = dir
   this.state = {
+    started: new Date(),
     commit: { sha: getCommit(dir) },
     link: null,
     repo: null,
