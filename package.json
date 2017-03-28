@@ -10,6 +10,7 @@
     "parse-github-repo-url": "^1.4.0",
     "render-ci-matrix": "^1.0.1",
     "semver": "^5.3.0",
+    "sort-keys": "^1.1.2",
     "travis-ci": "^2.1.1"
   },
   "devDependencies": {
