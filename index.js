@@ -1,76 +1,71 @@
-#!/usr/bin/env node
 'use strict'
 
-const fs = require('fs')
 const Travis = require('travis-ci')
-const resolve = require('path').resolve
 const getCommit = require('git-current-commit').sync
 const gitRemoteOriginUrl = require('git-remote-origin-url')
 const parseGitHubRepoUrl = require('parse-github-repo-url')
-const render = require('./lib/render')
-
-const dir = resolve(process.argv[2] || '.')
-
-try {
-  fs.statSync(dir)
-} catch (err) {
-  console.error('Usage: travis-watch [DIRECTORY]')
-  process.exit(1)
-}
-
-try {
-  fs.statSync(`${dir}/.travis.yml`)
-} catch (err) {
-  console.error('Travis not set up. Skipping...')
-  process.exit(0)
-}
+const EventEmitter = require('events')
+const inherits = require('util').inherits
+const sort = require('sort-keys')
+const cmp = require('./lib/compare')
 
 const travis = new Travis({ version: '2.0.0' })
 
-const state = {
-  commit: { sha: getCommit(dir) },
-  link: null,
-  repo: null,
-  build: null,
-  results: {},
-  success: null
+module.exports = Watch
+inherits(Watch, EventEmitter)
+
+function Watch (dir) {
+  if (!(this instanceof Watch)) return new Watch(dir)
+  EventEmitter.call(this)
+
+  this._dir = dir
+  this.state = {
+    commit: { sha: getCommit(dir) },
+    link: null,
+    repo: null,
+    build: null,
+    results: {},
+    success: null
+  }
 }
 
-const getRepo = (dir, cb) => {
-  gitRemoteOriginUrl(dir)
+Watch.prototype._getRepo = function (cb) {
+  gitRemoteOriginUrl(this._dir)
     .then(url => setImmediate(() => cb(null, parseGitHubRepoUrl(url))))
     .catch(err => setImmediate(() => cb(err)))
 }
 
-const getBuilds = cb => {
+Watch.prototype._getBuilds = function (cb) {
   const onrepo = (err, repo) => {
     if (err) return cb(err)
-    state.repo = repo
+    this.state.repo = repo
     travis.repos(repo[0], repo[1]).builds.get({ event_type: 'push' }, cb)
   }
 
-  if (state.repo) onrepo(null, state.repo)
-  else getRepo(dir, onrepo)
+  if (this.state.repo) onrepo(null, this.state.repo)
+  else this._getRepo(onrepo)
 }
 
-const findCommit = commits => commits.find(c => c.sha === state.commit.sha)
+Watch.prototype._findCommit = function (commits) {
+  return commits.find(c => c.sha === this.state.commit.sha)
+}
 
 const findBuild = (builds, commitId) =>
   builds.find(b => b.commit_id === commitId)
 
-const getBuild = cb => {
-  getBuilds((err, res) => {
+Watch.prototype._getBuild = function (cb) {
+  this._getBuilds((err, res) => {
     if (err) return cb(err)
-    const commit = findCommit(res.commits)
-    if (!commit) return setTimeout(() => getBuild(cb), 1000)
-    state.commit = commit
+    const commit = this._findCommit(res.commits)
+    if (!commit) return setTimeout(() => this._getBuild(cb), 1000)
+    this.state.commit = commit
     const build = findBuild(res.builds, commit.id)
     if (build) {
-      state.build = build
-      state.link = `https://travis-ci.org/${state.repo[0]}/${state.repo[1]}/builds/${state.build.id}`
+      this.state.build = build
+      this.state.link = `https://travis-ci.org/${this.state.repo[0]}/${this.state.repo[1]}/builds/${this.state.build.id}`
       cb()
     } else {
-      getBuild(cb)
+      this._getBuild(cb)
     }
   })
 }
@@ -102,36 +97,50 @@ const getLanguageVersion = job =>
         ? '?'
         : String(job.config[job.config.language]) || '?'
 
-getBuild(err => {
-  if (err) throw err
+Watch.prototype.start = function () {
+  this._getBuild(err => {
+    if (err) return this.emit('error', err)
 
-  let todo = state.build.job_ids.length
+    let todo = this.state.build.job_ids.length
 
-  state.build.job_ids.forEach(jobId => {
-    const check = (err, job) => {
-      if (err) throw err
-      job.version = getLanguageVersion(job)
-      job.key = getJobKey(job)
-      state.results[job.config.os] = state.results[job.config.os] || {}
-      state.results[job.config.os][job.key] = job
-      if (job.state === 'failed' && !job.allow_failure) state.success = false
-      if (
-        job.state === 'started' ||
-        job.state === 'created' ||
-        job.state === 'received' ||
-        job.state === 'queued'
-      ) {
-        setTimeout(() => getJob(jobId, check), 1000)
-      } else {
-        if (!--todo) {
-          if (typeof state.success !== 'boolean') state.success = true
-          render(state)
-          process.exit(!state.success)
+    this.state.build.job_ids.forEach(jobId => {
+      const check = (err, job) => {
+        if (err) throw err
+        job.version = getLanguageVersion(job)
+        job.key = getJobKey(job)
+        if (!this.state.results[job.config.os]) {
+          this.state.results[job.config.os] = {}
+          this.state.results = sort(this.state.results)
+        }
+        if (this.state.results[job.config.os][job.key]) {
+          this.state.results[job.config.os][job.key] = job
+        } else {
+          this.state.results[job.config.os][job.key] = job
+          Object.keys(this.state.results).forEach(os => {
+            this.state.results[os] = sort(this.state.results[os], (a, b) =>
+              cmp(this.state.results[os][a], this.state.results[os][b]))
+          })
+        }
+        if (job.state === 'failed' && !job.allow_failure) {
+          this.state.success = false
+        }
+        if (
+          job.state === 'started' ||
+          job.state === 'created' ||
+          job.state === 'received' ||
+          job.state === 'queued'
+        ) {
+          setTimeout(() => getJob(jobId, check), 1000)
+        } else {
+          if (!--todo) {
+            if (typeof this.state.success !== 'boolean') {
+              this.state.success = true
+            }
+            this.emit('finish')
+          }
         }
       }
-    }
-    getJob(jobId, check)
+      getJob(jobId, check)
+    })
   })
-})
-
-setInterval(() => render(state), 100)
+}

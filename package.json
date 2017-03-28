@@ -22,6 +22,6 @@
     "test": "prettier-standard-formatter *.js test/*.js && standard && tap test/*.js"
   },
   "bin": {
-    "travis-watch": "index.js"
+    "travis-watch": "bin.js"
   }
 }

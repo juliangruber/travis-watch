@@ -28,6 +28,30 @@ Usage: travis-watch [DIRECTORY]
 
 For more, please [open an issue](https://github.com/juliangruber/travis-watch/issues/new).
 
+## JavaScript API
+
+```js
+const differ = require('ansi-diff-stream')
+const render = require('render-ci-matrix')()
+const Watch = require('travis-watch')
+
+const diff = differ()
+diff.pipe(process.stdout)
+
+const watch = new Watch(process.cwd())
+watch.start()
+
+setInterval(
+  () => diff.write(render(watch.state)),
+  100
+)
+
+watch.on('finish', () => {
+  diff.write(render(watch.state))
+  process.exit(!watch.state.success)
+})
+```
+
 ## Kudos
 
 - Development of this module is sponsored by the [Dat Project](https://datproject.org/).
