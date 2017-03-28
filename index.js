@@ -36,22 +36,20 @@ const state = {
 }
 
 const getRepo = (dir, cb) => {
-  if (state.repo) return cb()
   gitRemoteOriginUrl(dir)
-    .then(url => {
-      state.repo = parseGitHubRepoUrl(url)
-      cb()
-    })
+    .then(url => setImmediate(() => cb(null, parseGitHubRepoUrl(url))))
     .catch(err => setImmediate(() => cb(err)))
 }
 
 const getBuilds = cb => {
-  getRepo(dir, err => {
+  const onrepo = (err, repo) => {
     if (err) return cb(err)
-    travis
-      .repos(state.repo[0], state.repo[1])
-      .builds.get({ event_type: 'push' }, cb)
-  })
+    state.repo = repo
+    travis.repos(repo[0], repo[1]).builds.get({ event_type: 'push' }, cb)
+  }
+
+  if (state.repo) onrepo()
+  else getRepo(dir, onrepo)
 }
 
 const findCommit = commits => commits.find(c => c.sha === state.commit.sha)
@@ -135,4 +133,3 @@ getBuild(err => {
 })
 
 setInterval(() => render(state), 100)
-
