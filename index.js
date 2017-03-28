@@ -110,7 +110,7 @@ Watch.prototype.start = function () {
 
     this.state.build.job_ids.forEach(jobId => {
       const check = (err, job) => {
-        if (err) throw err
+        if (err) return this.emit('error', err)
         job.version = getLanguageVersion(job)
         job.key = getJobKey(job)
         if (!this.state.results[job.config.os]) {
