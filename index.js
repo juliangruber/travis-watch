@@ -29,6 +29,7 @@ const travis = new Travis({ version: '2.0.0' })
 
 const state = {
   commit: { sha: getCommit(dir) },
+  link: null,
   repo: null,
   build: null,
   results: {},
@@ -66,6 +67,7 @@ const getBuild = cb => {
     const build = findBuild(res.builds, commit.id)
     if (build) {
       state.build = build
+      state.link = `https://travis-ci.org/${state.repo[0]}/${state.repo[1]}/builds/${state.build.id}`
       cb()
     } else {
       getBuild(cb)

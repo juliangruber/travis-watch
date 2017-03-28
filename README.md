@@ -31,9 +31,12 @@ For more, please [open an issue](https://github.com/juliangruber/travis-watch/is
 ## Kudos
 
 - Development of this module is sponsored by the [Dat Project](https://datproject.org/).
-- __[ansi-diff-stream](https://github.com/mafintosh/ansi-diff-stream)__ makes for flicker free terminal rendering
-- Spinners through __[cli-spinners](https://github.com/sindresorhus/cli-spinners)__
 - Travis is :heart:
+
+## Related
+
+- __[ansi-diff-stream](https://github.com/mafintosh/ansi-diff-stream)__ &mdash; A transform stream that diffs input buffers and outputs the diff as ANSI. If you pipe this to a terminal it will update the output with minimal changes
+- __[render-ci-matrix](https://github.com/juliangruber/render-ci-matrix)__ &mdash; Render a CI results matrix to the terminal.
 
 ## License
 
