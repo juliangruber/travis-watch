@@ -48,7 +48,7 @@ const getBuilds = cb => {
     travis.repos(repo[0], repo[1]).builds.get({ event_type: 'push' }, cb)
   }
 
-  if (state.repo) onrepo()
+  if (state.repo) onrepo(null, state.repo)
   else getRepo(dir, onrepo)
 }
 
