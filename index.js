@@ -31,37 +31,31 @@ function Watch (dir) {
   }
 }
 
-Watch.prototype._getRepo = function (cb) {
-  gitRemoteOriginUrl(this._dir)
-    .then(url => setImmediate(() => {
+Watch.prototype._getRepo = function () {
+  return gitRemoteOriginUrl(this._dir)
+    .then(url => {
       this.state.repo = parseGitHubRepoUrl(url)
       this._getCanonicalRepo()
-      cb()
-    }))
-    .catch(err => setImmediate(() => cb(err)))
+    })
 }
 
 Watch.prototype._getCanonicalRepo = function () {
   const url = `api.github.com/repos/${this.state.repo[0]}/${this.state.repo[1]}`
-  got(url, { json: true })
+  return got(url, { json: true })
     .then(res => {
       this.state.repo = res.body.full_name.split('/')
-    })
-    .catch(err => {
-      setImmediate(() => this.emit('error', err))
     })
 }
 
 Watch.prototype._getBuilds = function (cb) {
-  const onrepo = err => {
-    if (err) return cb(err)
-    travis
-      .repos(this.state.repo[0], this.state.repo[1])
-      .builds.get({ event_type: 'push' }, cb)
-  }
-
-  if (this.state.repo) onrepo()
-  else this._getRepo(onrepo)
+  return this._getRepo()
+    .then(() => {
+      const d = Deferred()
+      travis
+        .repos(this.state.repo[0], this.state.repo[1])
+        .builds.get({ event_type: 'push' }, d.cb)
+      return d
+    })
 }
 
 Watch.prototype._findCommit = function (commits) {
@@ -76,21 +70,16 @@ Watch.prototype._link = function () {
   return `https://travis-ci.org/${this.state.repo[0]}/${this.state.repo[1]}/builds/${this.state.build.id}`
 }
 
-Watch.prototype._getBuild = function (cb) {
-  this._getBuilds((err, res) => {
-    if (err) return cb(err)
-    if (!res.builds.length) return setTimeout(() => this._getBuild(cb), 500)
+Watch.prototype._getBuild = function () {
+  return this._getBuilds().then(res => {
+    if (!res.builds.length) return this._getBuild() // TODO sleep
     const commit = this._findCommit(res.commits)
-    if (!commit) return setTimeout(() => this._getBuild(cb), 1000)
+    if (!commit) return this._getBuild()
     this.state.commit = commit
     const build = this._findBuild(res.builds)
-    if (build) {
-      this.state.build = build
-      this.state.link = this._link()
-      cb()
-    } else {
-      this._getBuild(cb)
-    }
+    if (!build) return this._getBuild()
+    this.state.build = build
+    this.state.link = this._link()
   })
 }
 
@@ -102,14 +91,13 @@ const fixOSXBug = job => {
   ) {
     job.state = 'created'
   }
+  return job
 }
 
 const getJob = (id, cb) => {
-  travis.jobs(id).get((err, res) => {
-    if (err) return cb(err)
-    fixOSXBug(res.job)
-    cb(null, res.job)
-  })
+  const d = deferred()
+  travis.jobs(id).get(d.cb)
+  return d.then(job => fixOSXBug(job))
 }
 
 const getJobKey = job => JSON.stringify(job.config)
@@ -122,9 +110,7 @@ const getLanguageVersion = job =>
         : String(job.config[job.config.language]) || '?'
 
 Watch.prototype.start = function () {
-  this._getBuild(err => {
-    if (err) return this.emit('error', err)
-
+  return this._getBuild().then(() => {
     let todo = this.state.build.job_ids.length
 
     this.state.build.job_ids.forEach(jobId => {
