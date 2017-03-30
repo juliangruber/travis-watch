@@ -62,13 +62,10 @@ Watch.prototype._getBuild = function (cb) {
     if (!commit) return setTimeout(() => this._getBuild(cb), 1000)
     this.state.commit = commit
     const build = this._findBuild(res.builds)
-    if (build) {
-      this.state.build = build
-      this.state.link = this._link()
-      cb()
-    } else {
-      this._getBuild(cb)
-    }
+    if (!build) return this._getBuild(cb)
+    this.state.build = build
+    this.state.link = this._link()
+    cb()
   })
 }
 
