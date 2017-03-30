@@ -2,13 +2,11 @@
 
 const Travis = require('travis-ci')
 const getCommit = require('git-current-commit').sync
-const gitRemoteOriginUrl = require('git-remote-origin-url')
-const parseGitHubRepoUrl = require('parse-github-repo-url')
 const EventEmitter = require('events')
 const inherits = require('util').inherits
 const sort = require('sort-keys')
 const cmp = require('./lib/compare')
-const got = require('got')
+const canonical = require('gh-canonical-repository')
 
 const travis = new Travis({ version: '2.0.0' })
 
@@ -31,37 +29,17 @@ function Watch (dir) {
   }
 }
 
-Watch.prototype._getRepo = function (cb) {
-  gitRemoteOriginUrl(this._dir)
-    .then(url => setImmediate(() => {
-      this.state.repo = parseGitHubRepoUrl(url)
-      this._getCanonicalRepo()
-      cb()
-    }))
-    .catch(err => setImmediate(() => cb(err)))
-}
-
-Watch.prototype._getCanonicalRepo = function () {
-  const url = `api.github.com/repos/${this.state.repo[0]}/${this.state.repo[1]}`
-  got(url, { json: true })
-    .then(res => {
-      this.state.repo = res.body.full_name.split('/')
-    })
-    .catch(err => {
-      setImmediate(() => this.emit('error', err))
-    })
-}
-
 Watch.prototype._getBuilds = function (cb) {
-  const onrepo = err => {
+  const onrepo = (err, repo) => {
     if (err) return cb(err)
+    this.state.repo = repo
     travis
       .repos(this.state.repo[0], this.state.repo[1])
       .builds.get({ event_type: 'push' }, cb)
   }
 
-  if (this.state.repo) onrepo()
-  else this._getRepo(onrepo)
+  if (this.state.repo) onrepo(null, this.state.repo)
+  else canonical(this._dir, onrepo, onrepo)
 }
 
 Watch.prototype._findCommit = function (commits) {
