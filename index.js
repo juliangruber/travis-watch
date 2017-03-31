@@ -20,7 +20,10 @@ function Watch (dir) {
   this._dir = dir
   this.state = {
     started: new Date(),
-    commit: { sha: getCommit(dir) },
+    commit: {
+      sha: getCommit(dir),
+      found: false
+    },
     link: null,
     repo: null,
     build: null,
@@ -60,7 +63,12 @@ Watch.prototype._getBuild = function (cb) {
     if (!res.builds.length) return setTimeout(() => this._getBuild(cb), 500)
     const commit = this._findCommit(res.commits)
     if (!commit) return setTimeout(() => this._getBuild(cb), 1000)
-    this.state.commit = commit
+    this.state.commit = {
+      sha: commit.sha,
+      id: commit.id,
+      found: true,
+      branch: commit.branch
+    }
     const build = this._findBuild(res.builds)
     if (!build) return this._getBuild(cb)
     this.state.build = build
@@ -106,7 +114,11 @@ Watch.prototype.start = function () {
       const check = (err, job) => {
         if (err) return this.emit('error', err)
         job.version = getLanguageVersion(job)
+        job.name = `${job.config.language}: ${job.version}`
         job.key = getJobKey(job)
+        job.env = job.config.env
+        job.startedAt = job.started_at
+        job.allowFailure = job.allow_failure
         if (!this.state.results[job.config.os]) {
           this.state.results[job.config.os] = {}
           this.state.results = sort(this.state.results)
