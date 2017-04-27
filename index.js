@@ -32,13 +32,15 @@ function Watch (dir) {
   }
 }
 
-Watch.prototype._getBuilds = function (cb) {
+Watch.prototype._getBuilds = function (offset, cb) {
   const onrepo = (err, repo) => {
     if (err) return cb(err)
     this.state.repo = repo
+    const opts = { event_type: 'push' }
+    if (typeof offset === 'number') opts.after_number = offset
     travis
       .repos(this.state.repo[0], this.state.repo[1])
-      .builds.get({ event_type: 'push' }, cb)
+      .builds.get(opts, cb)
   }
 
   if (this.state.repo) onrepo(null, this.state.repo)
@@ -58,23 +60,28 @@ Watch.prototype._link = function () {
 }
 
 Watch.prototype._getBuild = function (cb) {
-  this._getBuilds((err, res) => {
-    if (err) return cb(err)
-    if (!res.builds.length) return setTimeout(() => this._getBuild(cb), 500)
-    const commit = this._findCommit(res.commits)
-    if (!commit) return setTimeout(() => this._getBuild(cb), 1000)
-    this.state.commit = {
-      sha: commit.sha,
-      id: commit.id,
-      found: true,
-      branch: commit.branch
-    }
-    const build = this._findBuild(res.builds)
-    if (!build) return this._getBuild(cb)
-    this.state.build = build
-    this.state.link = this._link()
-    cb()
-  })
+  const attempt = offset => {
+    console.error('attempt', offset)
+    this._getBuilds(offset, (err, res) => {
+      if (err) return cb(err)
+      if (!res.builds.length) return setTimeout(() => attempt, 500)
+      const commit = this._findCommit(res.commits)
+      if (!commit) return setTimeout(() => attempt(res.builds[res.builds.length - 1].number), 1000)
+      this.state.commit = {
+        sha: commit.sha,
+        id: commit.id,
+        found: true,
+        branch: commit.branch
+      }
+      const build = this._findBuild(res.builds)
+      if (!build) return attempt(offset)
+      this.state.build = build
+      this.state.link = this._link()
+      cb()
+    })
+  }
+
+  attempt()
 }
 
 const fixOSXBug = job => {

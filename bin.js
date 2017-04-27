@@ -36,8 +36,8 @@ watch.on('finish', () => {
 
 setInterval(
   () => {
-    diff.reset() // FIXME
-    diff.write(render(watch.state))
+    //diff.reset() // FIXME
+    //diff.write(render(watch.state))
   },
   100
 )
