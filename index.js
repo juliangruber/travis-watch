@@ -70,8 +70,14 @@ Watch.prototype._getBuild = function (cb) {
       branch: commit.branch
     }
     const build = this._findBuild(res.builds)
-    if (!build) return this._getBuild(cb)
-    this.state.build = build
+    if (!build || !build.started_at) return this._getBuild(cb)
+    this.state.build = {
+      id: build.id,
+      number: build.number,
+      startedAt: build.started_at,
+      finishedAt: build.finished_at,
+      job_ids: build.job_ids
+    }
     this.state.link = this._link()
     cb()
   })
