@@ -15,7 +15,7 @@
   "devDependencies": {
     "prettier-standard-formatter": "^0.222222222222222.333333333333333",
     "standard": "^10.0.0",
-    "tap": "^10.3.0"
+    "tap": "^11.0.0"
   },
   "scripts": {
     "test": "prettier-standard-formatter *.js test/*.js && standard && tap test/*.js"
