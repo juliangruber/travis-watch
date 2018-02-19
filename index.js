@@ -54,7 +54,13 @@ Watch.prototype._findBuild = function (builds) {
 }
 
 Watch.prototype._link = function () {
-  return `https://travis-ci.org/${this.state.repo[0]}/${this.state.repo[1]}/builds/${this.state.build.id}`
+  return [
+    'https://travis-ci.org',
+    this.state.repo[0],
+    this.state.repo[1],
+    'builds',
+    this.state.build.id
+  ].join('/')
 }
 
 Watch.prototype._getBuild = function (cb) {
@@ -107,8 +113,8 @@ const getLanguageVersion = job =>
   job.config.language === 'ruby'
     ? String(job.config.rvm)
     : job.config.language === 'android'
-        ? '?'
-        : String(job.config[job.config.language]) || '?'
+      ? '?'
+      : String(job.config[job.config.language]) || '?'
 
 Watch.prototype.start = function () {
   this._getBuild(err => {
@@ -135,7 +141,8 @@ Watch.prototype.start = function () {
           this.state.results[job.config.os][job.key] = job
           Object.keys(this.state.results).forEach(os => {
             this.state.results[os] = sort(this.state.results[os], (a, b) =>
-              cmp(this.state.results[os][a], this.state.results[os][b]))
+              cmp(this.state.results[os][a], this.state.results[os][b])
+            )
           })
         }
         if (job.state === 'failed' && !job.allow_failure) {
