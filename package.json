@@ -9,7 +9,7 @@
     "git-current-commit": "^1.0.0",
     "render-ci-matrix": "^2.2.0",
     "semver": "^6.0.0",
-    "sort-keys": "^1.1.2",
+    "sort-keys": "^3.0.0",
     "travis-ci": "^2.1.1"
   },
   "devDependencies": {
