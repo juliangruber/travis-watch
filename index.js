@@ -109,12 +109,18 @@ const getJob = (id, cb) => {
 
 const getJobKey = job => JSON.stringify(job.config)
 
-const getLanguageVersion = job =>
-  job.config.language === 'ruby'
-    ? String(job.config.rvm)
-    : job.config.language === 'android'
-      ? '?'
-      : String(job.config[job.config.language]) || '?'
+const getLanguageVersion = job => {
+  if (job.config.language === 'ruby') {
+    return String(job.config.rvm)
+  } else if (
+    job.config[job.config.language] &&
+    job.config.language !== 'android'
+  ) {
+    return String(job.config[job.config.language])
+  } else {
+    return '?'
+  }
+}
 
 Watch.prototype.start = function () {
   this._getBuild(err => {
