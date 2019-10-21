@@ -15,7 +15,7 @@
   "devDependencies": {
     "prettier-standard": "^15.0.0",
     "standard": "^14.1.0",
-    "tap": "^12.0.0"
+    "tap": "^14.8.0"
   },
   "scripts": {
     "test": "prettier-standard '*.js' 'test/*.js' && standard && tap test/*.js"
